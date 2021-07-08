@@ -1,3 +1,4 @@
 /venv/
 /.idea/
 /business_index/db.sqlite3
+/business_index/rest_api/migrations/
