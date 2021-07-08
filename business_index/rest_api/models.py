@@ -16,6 +16,6 @@ class Business(models.Model):
         model_string = f'{self.id}'
         for field in fields_to_display:
             sub_str = ', '
-            sub_str += getattr(self, field) if getattr(self, field) else f'no-{field}'
+            sub_str += str(getattr(self, field)) if str(getattr(self, field)) else f'no-{field}'
             model_string += sub_str
         return model_string
