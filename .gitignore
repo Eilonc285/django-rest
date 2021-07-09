@@ -2,3 +2,4 @@
 /.idea/
 /business_index/db.sqlite3
 /business_index/rest_api/migrations/
+/business_index/rest_api/geckodriver.log
