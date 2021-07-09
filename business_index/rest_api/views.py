@@ -1,9 +1,9 @@
-import django.http
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from .models import Business
 from .serializers import BusinessSerializer
+from .easy_web_scraper import get_first_business_info
 
 
 # Create your views here.
@@ -43,3 +43,13 @@ class BusinessView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors)
+
+
+class WebScraperView(APIView):
+    def post(self, request, *args, **kwargs):
+        business = get_first_business_info(request.data)
+        serializer = BusinessSerializer(data=business)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(status=status.HTTP_200_OK)

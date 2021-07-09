@@ -7,13 +7,13 @@ WBSITE_URL = 'https://easy.co.il/'
 
 def get_first_business_info(data):
     try:
-        values = data.values()
+        values = list(data.values())
     except Exception as e:
         print(e)
         return
 
     params = ''
-    for i, val in enumerate(list(values)[::-1]):
+    for i, val in enumerate(values[::-1]):
         words = str(val).split(' ')
         for j, w in enumerate(words):
             params += w
@@ -42,11 +42,15 @@ def get_first_business_info(data):
         driver.quit()
 
     hebrew_letters_set = 'אבגדהוזחטיכךלמםנןסעפףצץקרשת'
-    pattern = re.compile(rf'([{hebrew_letters_set}\'\"\s]+)\s(\d*),\s([{hebrew_letters_set}\'\"\s]+)')
-    first_match = next(pattern.finditer(address))
-
-    business['street'] = first_match.group(1)
-    business['number'] = first_match.group(2)
-    business['city'] = first_match.group(3)
+    pattern = re.compile(rf'([{hebrew_letters_set}\'\"\s]+)\s*(\d*),\s([{hebrew_letters_set}\'\"\s]+)')
+    try:
+        first_match = next(pattern.finditer(address))
+    except Exception as e:
+        print(e.with_traceback())
+        business = None
+    else:
+        business['street'] = first_match.group(1)
+        business['number'] = first_match.group(2)
+        business['city'] = first_match.group(3)
 
     return business
