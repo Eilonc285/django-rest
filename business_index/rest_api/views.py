@@ -47,9 +47,13 @@ class BusinessView(APIView):
 
 class WebScraperView(APIView):
     def post(self, request, *args, **kwargs):
-        business = get_first_business_info(request.data)
+        try:
+            business = get_first_business_info(request.data)
+        except ValueError as e:
+            print(e)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         serializer = BusinessSerializer(data=business)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_404_NOT_FOUND)
