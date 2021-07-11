@@ -9,8 +9,9 @@ def get_first_business_info(data):
     try:
         values = list(data.values())
     except Exception as e:
+        print('Conversion of given data from dict to list failed.')
         print(e)
-        return
+        raise ValueError(f'Expected a dictionary, received {type(data)}.')
 
     params = ''
     for i, val in enumerate(values[::-1]):
@@ -36,8 +37,9 @@ def get_first_business_info(data):
         business['grade'] = driver.find_elements_by_xpath('//div[@class="biz-inner"]//span[@class="biz-list-rating"]')[0].text
         address = driver.find_elements_by_xpath('//div[@class="biz-inner"]//p[@class="biz-list-address"]')[0].text
     except Exception as e:
+        print('Getting text from html elements failed.')
         print(e)
-        return
+        return None
     finally:
         driver.quit()
 
@@ -46,8 +48,9 @@ def get_first_business_info(data):
     try:
         first_match = next(pattern.finditer(address))
     except Exception as e:
-        print(e.with_traceback())
-        business = None
+        print('Regular expression match not found.')
+        print(e)
+        return None
     else:
         business['street'] = first_match.group(1)
         business['number'] = first_match.group(2)
