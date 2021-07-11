@@ -1,7 +1,7 @@
 from .test_setup import TestSetUp
 from django.urls import reverse
 from unittest.mock import patch
-from ..models import Business
+from .. import models, views
 
 
 class TestBusinessView(TestSetUp):
@@ -19,11 +19,29 @@ class TestBusinessView(TestSetUp):
 
 
 class TestWebScraperView(TestSetUp):
-    def test_POST_for_business(self):
-        with patch('rest_api.easy_web_scraper.get_first_business_info') as mocked_scrape:
-            mocked_scrape.return_value = {'title': 'BBB', 'sub_title': 'Burger chain', 'grade': 7.7, 'street': 'ragger',
-                                          'number': 22, 'city': 'Beersheba'}
-            response = self.client.post(reverse('rest_api:web_scraper'), data={'title': 'BBB', 'info': 'Burger'})
-            self.assertEquals(response.status_code, 200)
-            b = Business.objects.get(title='BBB')
-            self.assertIsNotNone(b)
+    def test_POST_for_existing_business(self):
+        def mocked_scraper(data):
+            return {'title': 'BBB', 'sub_title': 'Burger chain', 'grade': 7.7, 'street': 'ragger',
+                    'number': 22, 'city': 'Beersheba'}
+
+        views.get_first_business_info = mocked_scraper
+        request = self.factory.post(reverse('rest_api:web_scraper'), data={'title': 'BBB', 'info': 'Burger'})
+        request.data = {'title': 'BBB', 'info': 'Burger'}
+        _view = views.WebScraperView()
+        response = _view.post(request)
+        self.assertEquals(response.status_code, 200)
+        b = models.Business.objects.get(title='BBB')
+        self.assertIsNotNone(b)
+
+    def test_POST_for_non_existing_business(self):
+        def mocked_scraper(data):
+            return None
+
+        views.get_first_business_info = mocked_scraper
+        request = self.factory.post(reverse('rest_api:web_scraper'), data={'title': 'BBB', 'info': 'Burger'})
+        request.data = {'title': 'BBB', 'info': 'Burger'}
+        _view = views.WebScraperView()
+        response = _view.post(request)
+        self.assertEquals(response.status_code, 404)
+        b = models.Business.objects.filter(title='BBB')
+        self.assertEquals(len(b), 0)
